@@ -1,0 +1,36 @@
+services:
+  mongo:
+    image: mongo:4.4.4
+    container_name: mongo
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-data-4.4:/data/db
+    networks:
+      - app-network
+
+  app:
+    build: .
+    container_name: my_node_app
+    restart: always
+    ports:
+      - "8080:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGO_URI=mongodb://admin:admin@mongo:27017
+    depends_on:
+      - mongo
+    volumes:
+      - ./:/opt/app
+      - /opt/app/node_modules
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
