@@ -13,9 +13,9 @@ services:
     networks:
       - app-network
 
-  app:
+  top-api:
     build: .
-    container_name: my_node_app
+    container_name: TopApi
     restart: always
     ports:
       - "8080:3000"
@@ -26,7 +26,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./:/opt/app
+      - ./.env:/opt/app/.env
       - /opt/app/node_modules
     networks:
       - app-network
