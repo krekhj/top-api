@@ -53,7 +53,7 @@ export class ProductController {
 	@Post('find')
 	async find(@Body() dto: FindProductDto) {
 		const findedProduct = await this.productService.findWithReview(dto);
-		if (!findedProduct) {
+		if (!findedProduct.length) {
 			throw new NotFoundException('Продукт не найден');
 		}
 		return findedProduct;
