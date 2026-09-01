@@ -35,6 +35,14 @@ export class TopPageService {
 		return resp;
 	}
 
+	async findAll() {
+		const resp = await this.topPageModel.find().exec();
+		if (!resp.length) {
+			throw new NotFoundException('Не найдёно');
+		}
+		return resp;
+	}
+
 	async updateById(id: string, dto: CreatePageDto) {
 		const resp = await this.topPageModel.findByIdAndUpdate(id, dto, { new: true }).exec();
 		if (!resp) {

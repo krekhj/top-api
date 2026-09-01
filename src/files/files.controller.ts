@@ -1,5 +1,5 @@
 import {
-	BadRequestException,
+	// BadRequestException,
 	Controller,
 	HttpCode,
 	Post,
@@ -13,7 +13,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { FileElementResponce } from './dto/files-responce.dto';
 import { FilesService } from './files.service';
-import sharp from 'sharp';
+import { MFile } from './dto/mfile.class';
 
 @Controller('files')
 export class FilesController {
@@ -22,16 +22,22 @@ export class FilesController {
 	@Post('upload')
 	@HttpCode(200)
 	@UseGuards(JwtAuthGuard)
-	@UseInterceptors(FileInterceptor)
+	@UseInterceptors(FileInterceptor('files'))
 	async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<FileElementResponce[]> {
-		const res = await this.fileService.saveFiles([file]);
-		if (!res.length) {
-			throw new BadRequestException('Не удалось сохранить файл');
+		const saveArray: MFile[] = [file];
+		if (file.mimetype.includes('image')) {
+			const webp = await this.fileService.convertToWebPack(file.buffer);
+			saveArray.push(
+				new MFile({
+					originalname: `${file.originalname.split('.')[0]}.webp`,
+					buffer: webp,
+				}),
+			);
 		}
-		return res;
-	}
-
-	convertToWebPack(file: Buffer): Promise<Buffer> {
-		return sharp(file).webp().toBuffer();
+		return this.fileService.saveFiles(saveArray);
+		// if (!res.length) {
+		// 	throw new BadRequestException('Не удалось сохранить файл');
+		// }
+		// return res;
 	}
 }
