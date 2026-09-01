@@ -8,6 +8,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	UseGuards,
 	UsePipes,
 	ValidationPipe,
 } from '@nestjs/common';
@@ -15,10 +16,12 @@ import { ProductModel } from './product.model';
 import { FindProductDto } from './dto/find-product.dto';
 import { ProductService } from './product.service';
 import { IdValidationPipe } from '../pipes/ad-product.pipe';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @Controller('product')
 export class ProductController {
 	constructor(private readonly productService: ProductService) {}
+	@UsePipes(new ValidationPipe())
 	@Post('create')
 	async create(@Body() dto: Omit<ProductModel, '_id'>) {
 		return this.productService.create(dto);
@@ -45,7 +48,7 @@ export class ProductController {
 		}
 		return patchedProduct;
 	}
-	@UsePipes(new ValidationPipe())
+	@UseGuards(JwtAuthGuard)
 	@HttpCode(200)
 	@Post('find')
 	async find(@Body() dto: FindProductDto) {
